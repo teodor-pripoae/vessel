@@ -16,9 +16,9 @@ type BuildConfig struct {
 }
 
 type DeployConfig struct {
-	SlugLocation *string   `toml:"slug_location"`
-	Servers      *[]string `toml:"servers"`
-	Services     *[]string `toml:"services"`
+	SlugLocation  *string   `toml:"slug_location"`
+	UploadServers *[]string `toml:"upload_servers"`
+	Services      *[]string `toml:"services"`
 }
 
 type SlackNotifyConfig struct {

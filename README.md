@@ -5,6 +5,14 @@ Simple Heroku clone on your own servers. Based on [gitreceive](https://github.co
 
 This script takes a payload from gitreceive, runs the buildpack based on your configuration, uploads the slug to your servers and then restarts your services.
 
+### Compiling
+
+```bash
+$ go get github.com/BurntSushi/toml
+$ CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w' .
+$ # Upload vessel executable to your server and put it in /usr/local/bin
+```
+
 ### Installation
 
 In your gitreceive `receiver` script:
@@ -46,10 +54,10 @@ upload = [
   "myuser@worker2.myapp.com"
 ]
 services = [
-  "ssh://myuser@web1.myapp.com/rails",
-  "ssh://myuser@web2.myapp.com/rails",
-  "ssh://myuser@worker1.myapp.com/sidekiq",
-  "ssh://myuser@worker2.myapp.com/sidekiq"
+  "myuser@web1.myapp.com/rails",
+  "myuser@web2.myapp.com/rails",
+  "myuser@worker1.myapp.com/sidekiq",
+  "myuser@worker2.myapp.com/sidekiq"
 ]
 
 [notify]

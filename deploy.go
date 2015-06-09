@@ -5,15 +5,21 @@ import (
   "log"
   "os"
   "os/exec"
+  "strings"
 )
 
 func Deploy(slug_path string, config Config, app AppConfig) {
-  for _, server := range *app.Deploy.Servers {
+  for _, server := range *app.Deploy.UploadServers {
     copyDeploySlug(slug_path, server, config, app)
+  }
 
-    for _, service := range *app.Deploy.Services {
-      restartService(server, service, config, app)
+  for _, entry := range *app.Deploy.Services {
+    split := strings.Split(entry, "/")
+
+    if len(split) < 2 {
+      log.Fatalf("Please enter service in the format: myuser@myapp.com/my_service")
     }
+    restartService(split[0], split[1], config, app)
   }
 }
 
