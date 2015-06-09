@@ -1,0 +1,44 @@
+app = "Awesome App"
+stage = "production"
+
+[build]
+buildpack = "https://github.com/teodor-pripoae/heroku-buildpack-ruby.git"
+buildpack_vendor = "/buildpacks/heroku-buildpack-ruby"
+env_file = "/etc/vessel/env/myapp"
+env = [
+  "GEOIP_DIRECTORY=/buildpacks/geoip"
+]
+volumes = [
+  "/etc/vessel/buildpacks:/buildpacks",
+  "/var/vessel/build/myapp:/tmp/cache:rw"
+]
+
+[deploy]
+slug_location = "/etc/vessel/myapp/slug_current.tgz"
+upload = [
+  "myuser@web1.myapp.com",
+  "myuser@web2.myapp.com",
+  "myuser@worker1.myapp.com",
+  "myuser@worker2.myapp.com"
+]
+services = [
+  "ssh://myuser@web1.myapp.com/rails",
+  "ssh://myuser@web2.myapp.com/rails",
+  "ssh://myuser@worker1.myapp.com/sidekiq",
+  "ssh://myuser@worker2.myapp.com/sidekiq"
+]
+
+[notify]
+  [notify.slack]
+    channel = "#notifications"
+    webhook_url = "https://hooks.slack.com/services/token/anothertoken/yetanothertoken"
+    on_started = true
+    on_failure = true
+    on_success = true
+  [notify.opbeat]
+    org = "myorg_id"
+    app = "myapp_id"
+    token = "mytoken"
+    on_started = false
+    on_failure = false
+    on_success = true
