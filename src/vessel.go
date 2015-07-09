@@ -43,7 +43,12 @@ func main() {
 	NotifyOnStart(config, appConfig)
 
 	slugPath := Build(config, appConfig)
-	Deploy(slugPath, config, appConfig)
+	err := Deploy(slugPath, config, appConfig)
 
-	NotifyOnSuccess(config, appConfig)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		NotifyOnFailure(config, appConfig)
+	} else {
+		NotifyOnSuccess(config, appConfig)
+	}
 }
