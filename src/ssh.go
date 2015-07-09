@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -42,6 +43,7 @@ func getKeyFile(keyPath string) (ssh.Signer, error) {
 	}
 
 	pubkey, err := ssh.ParsePrivateKey(buf)
+
 	if err != nil {
 		return nil, err
 	}
@@ -87,22 +89,21 @@ func (ssh_conf *SSHConfig) connect() (*ssh.Session, error) {
 }
 
 // Run executes command on remote machine and returns STDOUT
-func (ssh_conf *SSHConfig) Run(command string) (string, error) {
+func (ssh_conf *SSHConfig) Run(command string) (string, string, error) {
 	session, err := ssh_conf.connect()
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	defer session.Close()
 
-	var b bytes.Buffer
-	session.Stdout = &b
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	session.Stdout = &stdout
+	session.Stderr = &stderr
 	err = session.Run(command)
-	if err != nil {
-		return "", err
-	}
 
-	return b.String(), nil
+	return stdout.String(), stderr.String(), err
 }
 
 // Scp uploads sourceFile to remote machine like native scp console app.
@@ -129,7 +130,7 @@ func (ssh_conf *SSHConfig) Scp(sourceFile string, destFile string) error {
 	go func() {
 		w, _ := session.StdinPipe()
 
-		fmt.Fprintln(w, "C0644", srcStat.Size(), destFile)
+		fmt.Fprintln(w, "C0644", srcStat.Size(), filepath.Base(destFile))
 
 		if srcStat.Size() > 0 {
 			io.Copy(w, src)
@@ -140,6 +141,9 @@ func (ssh_conf *SSHConfig) Scp(sourceFile string, destFile string) error {
 			w.Close()
 		}
 	}()
+
+	session.Stdout = os.Stdout
+	session.Stderr = os.Stderr
 
 	if err := session.Run(fmt.Sprintf("scp -t %s", destFile)); err != nil {
 		return err
@@ -179,6 +183,7 @@ func getSSHConfig(serverURL string) (*SSHConfig, error) {
 		Server:  *host,
 		Port:    *port,
 		Service: service,
+		Key:     "/.ssh/id_rsa",
 	}
 
 	return &config, nil
