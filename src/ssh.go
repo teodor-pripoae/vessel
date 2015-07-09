@@ -7,9 +7,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net"
+	"net/url"
 	"os"
 	"os/user"
+	"strings"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -22,6 +25,7 @@ type SSHConfig struct {
 	Port     string
 	Key      string
 	Password string
+	Service  string
 }
 
 func getKeyFile(keyPath string) (ssh.Signer, error) {
@@ -142,4 +146,88 @@ func (ssh_conf *SSHConfig) Scp(sourceFile string, destFile string) error {
 	}
 
 	return nil
+}
+
+// returns ssh connection config
+func getSSHConfig(serverURL string) (*SSHConfig, error) {
+	uri, err := url.Parse(serverURL)
+
+	if err != nil {
+		log.Fatalf("Failed to parse server url %v, err: %v", serverURL, err)
+		return nil, err
+	}
+
+	user, err := getSSHUser(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	host, port, err := getSSHHostPort(uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	service, err := getSSHService(uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	config := SSHConfig{
+		User:    *user,
+		Server:  *host,
+		Port:    *port,
+		Service: service,
+	}
+
+	return &config, nil
+}
+
+func getSSHUser(uri *url.URL) (*string, error) {
+	if uri.User != nil {
+		usr := uri.User.Username()
+		return &usr, nil
+	}
+
+	usr, err := user.Current()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &usr.Username, nil
+}
+
+func getSSHHostPort(uri *url.URL) (*string, *string, error) {
+	parsedHost := strings.Split(uri.Host, ":")
+
+	if len(parsedHost) == 0 {
+		log.Fatalf("server should not blank")
+		return nil, nil, fmt.Errorf("Server <%v> was not valid", uri.Host)
+	}
+
+	server := parsedHost[0]
+	port := "22"
+
+	if len(parsedHost) >= 2 {
+		port = parsedHost[1]
+	}
+
+	return &server, &port, nil
+}
+
+func getSSHService(uri *url.URL) (string, error) {
+	path := strings.Trim(uri.Path, "/")
+	splits := strings.Split(path, "/")
+
+	if len(splits) == 0 {
+		return "", nil
+	}
+
+	if len(splits) > 1 {
+		return "", fmt.Errorf("Service not well formatted: %v", uri.Path)
+	}
+
+	return splits[0], nil
 }
