@@ -10,19 +10,20 @@ import (
 	"strings"
 )
 
+// Build builds an app using config and returns slug_path
 func Build(config Config, app AppConfig) string {
 	checkStdin()
 
 	// this calls slug builder and get container id
-	container_id := buildSlug(config, app)
+	containerID := buildSlug(config, app)
 	// wait for build to finish, showing build output
-	waitContainer(container_id)
+	waitContainer(containerID)
 	// copy slug from container to a temporary location
-	slug_path := copySlug(container_id, config, app)
+	slugPath := copySlug(containerID, config, app)
 	// delete build container
-	deleteContainer(container_id)
+	deleteContainer(containerID)
 
-	return slug_path
+	return slugPath
 }
 
 func checkStdin() {
@@ -42,48 +43,47 @@ func buildSlug(config Config, app AppConfig) string {
 	cmd := exec.Command("docker")
 	cmd.Args = args
 	cmd.Stdin = os.Stdin
-	container_id, err := cmd.CombinedOutput()
+	containerID, err := cmd.CombinedOutput()
 
 	if err != nil {
-		fmt.Println(string(container_id))
-		log.Fatalf("Error running slugbuilder", err)
+		fmt.Println(string(containerID))
+		log.Fatalf("Error running slugbuilder %v", err)
 	}
 
-	cid := strings.TrimSpace(string(container_id))
+	cid := strings.TrimSpace(string(containerID))
 
 	fmt.Println("Container id:", cid)
 
 	return cid
 }
 
-func waitContainer(container_id string) {
-	cmd := exec.Command("docker", "logs", "-f", container_id)
+func waitContainer(containerID string) {
+	cmd := exec.Command("docker", "logs", "-f", containerID)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
 }
 
 // Copy slug.tgz from container to a temporary location
-func copySlug(container_id string, config Config, app AppConfig) string {
-	tmp_dir, err := ioutil.TempDir("", "")
+func copySlug(containerID string, config Config, app AppConfig) string {
+	tmpDir, err := ioutil.TempDir("", "")
 
 	if err != nil {
 		log.Fatalf("Error creating TempDir")
 	}
 
-	source := fmt.Sprintf("%s:/tmp/slug.tgz", container_id)
-	output, err := exec.Command("docker", "cp", source, tmp_dir).CombinedOutput()
+	source := fmt.Sprintf("%s:/tmp/slug.tgz", containerID)
+	output, err := exec.Command("docker", "cp", source, tmpDir).CombinedOutput()
 
 	if err != nil {
 		log.Fatalf(string(output))
 	}
 
-	slug_path := path.Join(tmp_dir, "slug.tgz")
-	return slug_path
+	return path.Join(tmpDir, "slug.tgz")
 }
 
-func deleteContainer(container_id string) {
-	cmd := exec.Command("docker", "rm", container_id)
+func deleteContainer(containerID string) {
+	cmd := exec.Command("docker", "rm", containerID)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
@@ -151,7 +151,7 @@ func slugBuilderAttachVolumes(cmd []string, config Config, app AppConfig) []stri
 func slugBuilderAttachImage(cmd []string, config Config, app AppConfig) []string {
 	if app.Build.BuildImage != nil {
 		return append(cmd, *app.Build.BuildImage)
-	} else {
-		return append(cmd, "flynn/slugbuilder")
 	}
+
+	return append(cmd, "flynn/slugbuilder")
 }
