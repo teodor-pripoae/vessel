@@ -46,7 +46,7 @@ func main() {
 	err := Deploy(slugPath, config, appConfig)
 
 	if err != nil {
-		fmt.Printf("Error: %v", err)
+		fmt.Printf("Error: %v\n", err)
 		NotifyOnFailure(config, appConfig)
 	} else {
 		NotifyOnSuccess(config, appConfig)
