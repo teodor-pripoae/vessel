@@ -11,9 +11,13 @@ import (
 )
 
 // Deploy is called after slug build finished
-func Deploy(slugPath string, config Config, app AppConfig) {
+func Deploy(slugPath string, config Config, app AppConfig) error {
 	for _, server := range *app.Deploy.UploadServers {
-		copyDeploySlug(slugPath, server, config, app)
+		err := copyDeploySlug(slugPath, server, app)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, entry := range *app.Deploy.Services {
@@ -24,18 +28,26 @@ func Deploy(slugPath string, config Config, app AppConfig) {
 		}
 		restartService(split[0], split[1], config, app)
 	}
+
+	return nil
 }
 
-func copyDeploySlug(slugPath string, server string, config Config, app AppConfig) {
+func copyDeploySlug(slugPath string, server string, app AppConfig) error {
 	if app.Deploy.SlugLocation == nil {
-		log.Fatalf("Deploy slug location not defined")
+		return fmt.Errorf("Deploy slug location not defined")
 	}
-	destination := fmt.Sprintf("%s:%s", server, *app.Deploy.SlugLocation)
 
-	cmd := exec.Command("scp", slugPath, destination)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Run()
+	sshConfig, err := getSSHConfig(server)
+
+	if err != nil {
+		return err
+	}
+
+	if err := sshConfig.Scp(slugPath, *app.Deploy.SlugLocation); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func restartService(server string, service string, config Config, app AppConfig) {

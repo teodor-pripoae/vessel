@@ -10,7 +10,6 @@ import (
 	"net"
 	"os"
 	"os/user"
-	"path/filepath"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -103,15 +102,13 @@ func (ssh_conf *SSHConfig) Run(command string) (string, error) {
 }
 
 // Scp uploads sourceFile to remote machine like native scp console app.
-func (ssh_conf *SSHConfig) Scp(sourceFile string) error {
+func (ssh_conf *SSHConfig) Scp(sourceFile string, destFile string) error {
 	session, err := ssh_conf.connect()
 
 	if err != nil {
 		return err
 	}
 	defer session.Close()
-
-	targetFile := filepath.Base(sourceFile)
 
 	src, srcErr := os.Open(sourceFile)
 
@@ -128,7 +125,7 @@ func (ssh_conf *SSHConfig) Scp(sourceFile string) error {
 	go func() {
 		w, _ := session.StdinPipe()
 
-		fmt.Fprintln(w, "C0644", srcStat.Size(), targetFile)
+		fmt.Fprintln(w, "C0644", srcStat.Size(), destFile)
 
 		if srcStat.Size() > 0 {
 			io.Copy(w, src)
@@ -140,7 +137,7 @@ func (ssh_conf *SSHConfig) Scp(sourceFile string) error {
 		}
 	}()
 
-	if err := session.Run(fmt.Sprintf("scp -t %s", targetFile)); err != nil {
+	if err := session.Run(fmt.Sprintf("scp -t %s", destFile)); err != nil {
 		return err
 	}
 
