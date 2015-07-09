@@ -121,11 +121,15 @@ func slugBuilderAttachEnv(cmd []string, config Config, app AppConfig) []string {
 		}
 	}
 
-	cmd = append(cmd, "-e")
-	cmd = append(cmd, fmt.Sprintf("BUILDPACK_URL=%s", app.Build.Buildpack))
+	if app.Build.Buildpack != "" {
+		cmd = append(cmd, "-e")
+		cmd = append(cmd, fmt.Sprintf("BUILDPACK_URL=%s", app.Build.Buildpack))
+	}
 
-	cmd = append(cmd, "-e")
-	cmd = append(cmd, fmt.Sprintf("BUILDPACK_VENDOR_URL=file://%s", app.Build.BuildpackVendor))
+	if app.Build.BuildpackVendor != "" {
+		cmd = append(cmd, "-e")
+		cmd = append(cmd, fmt.Sprintf("BUILDPACK_VENDOR_URL=file://%s", app.Build.BuildpackVendor))
+	}
 
 	cmd = append(cmd, "-e")
 	cmd = append(cmd, fmt.Sprintf("COMMIT_HASH=%s", config.Commit))
