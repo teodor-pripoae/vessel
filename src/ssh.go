@@ -64,10 +64,14 @@ func (ssh_conf *SSHConfig) connect() (*ssh.Session, error) {
 	if sshAgent, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK")); err == nil {
 		auths = append(auths, ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers))
 		defer sshAgent.Close()
+	} else {
+		fmt.Printf("Error adding ssh key: %v\n", err)
 	}
 
 	if pubkey, err := getKeyFile(ssh_conf.Key); err == nil {
 		auths = append(auths, ssh.PublicKeys(pubkey))
+	} else {
+		fmt.Printf("Error adding ssh key: %v\n", err)
 	}
 
 	config := &ssh.ClientConfig{
