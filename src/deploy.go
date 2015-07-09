@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
+	"os/user"
 	"strings"
 )
 
@@ -42,4 +44,66 @@ func restartService(server string, service string, config Config, app AppConfig)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
+}
+
+// returns ssh connection config
+func getSSHConfig(serverURL string) (*SSHConfig, error) {
+	uri, err := url.Parse(serverURL)
+
+	if err != nil {
+		log.Fatalf("Failed to parse server url %v, err: %v", serverURL, err)
+		return nil, err
+	}
+
+	user, err := getSSHUser(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	host, port, err := getSSHHostPort(uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	config := SSHConfig{
+		User:   *user,
+		Server: *host,
+		Port:   *port,
+	}
+
+	return &config, nil
+}
+
+func getSSHUser(uri *url.URL) (*string, error) {
+	if uri.User != nil {
+		usr := uri.User.Username()
+		return &usr, nil
+	}
+
+	usr, err := user.Current()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &usr.Username, nil
+}
+
+func getSSHHostPort(uri *url.URL) (*string, *string, error) {
+	parsedHost := strings.Split(uri.Host, ":")
+
+	if len(parsedHost) == 0 {
+		log.Fatalf("server should not blank")
+		return nil, nil, fmt.Errorf("Server <%v> was not valid", uri.Host)
+	}
+
+	server := parsedHost[0]
+	port := "22"
+
+	if len(parsedHost) >= 2 {
+		port = parsedHost[1]
+	}
+
+	return &server, &port, nil
 }
