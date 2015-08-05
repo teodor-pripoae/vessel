@@ -1,4 +1,4 @@
-package main
+package client
 
 // taken from github.com/hypersleep/easyssh
 

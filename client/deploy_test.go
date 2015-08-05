@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"os/user"
@@ -23,6 +23,7 @@ func (s *DeploySuite) TestGetSSHConfigNoPort(c *C) {
 	expectedConfig := SSHConfig{
 		User:   "myuser",
 		Server: "my.server.host",
+		Key:    "/.ssh/id_rsa",
 		Port:   "22",
 	}
 
@@ -38,6 +39,7 @@ func (s *DeploySuite) TestGetSSHConfigWithPort(c *C) {
 	expectedConfig := SSHConfig{
 		User:   "myuserb",
 		Server: "my.server.host",
+		Key:    "/.ssh/id_rsa",
 		Port:   "2222",
 	}
 
@@ -55,6 +57,7 @@ func (s *DeploySuite) TestGetSSHConfigNoUserNoPort(c *C) {
 		User:   currentUser.Username,
 		Server: "my.server.host",
 		Port:   "22",
+		Key:    "/.ssh/id_rsa",
 	}
 
 	c.Assert(err, IsNil)
@@ -71,6 +74,7 @@ func (s *DeploySuite) TestGetSSHConfigNoUserWithPort(c *C) {
 		User:   currentUser.Username,
 		Server: "my.server.host2",
 		Port:   "2244",
+		Key:    "/.ssh/id_rsa",
 	}
 
 	c.Assert(err, IsNil)
@@ -87,6 +91,7 @@ func (s *DeploySuite) TestGetSSHConfigNoPortService(c *C) {
 		Server:  "my.server.host",
 		Port:    "22",
 		Service: "myapp",
+		Key:     "/.ssh/id_rsa",
 	}
 
 	c.Assert(err, IsNil)
@@ -103,6 +108,7 @@ func (s *DeploySuite) TestGetSSHConfigWithPortService(c *C) {
 		Server:  "my.server.host",
 		Port:    "2222",
 		Service: "myapp",
+		Key:     "/.ssh/id_rsa",
 	}
 
 	c.Assert(err, IsNil)
@@ -120,6 +126,7 @@ func (s *DeploySuite) TestGetSSHConfigNoUserNoPortService(c *C) {
 		Server:  "my.server.host",
 		Port:    "22",
 		Service: "foo",
+		Key:     "/.ssh/id_rsa",
 	}
 
 	c.Assert(err, IsNil)
@@ -137,6 +144,7 @@ func (s *DeploySuite) TestGetSSHConfigNoUserWithPortService(c *C) {
 		Server:  "my.server.host2",
 		Port:    "2244",
 		Service: "bar",
+		Key:     "/.ssh/id_rsa",
 	}
 
 	c.Assert(err, IsNil)
