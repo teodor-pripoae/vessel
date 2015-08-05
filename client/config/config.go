@@ -1,4 +1,4 @@
-package client
+package config
 
 // Config keeps settings related to CLI (commit, config file, deployer)
 type Config struct {

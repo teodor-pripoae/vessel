@@ -1,4 +1,4 @@
-package client
+package main
 
 import (
 	"fmt"
@@ -7,15 +7,18 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/teodor-pripoae/vessel/client/build"
+	cfg "github.com/teodor-pripoae/vessel/client/config"
+	"github.com/teodor-pripoae/vessel/client/deploy"
+	"github.com/teodor-pripoae/vessel/client/notify"
 )
 
-func getConfig(args []string) Config {
+func getConfig(args []string) cfg.Config {
 	if len(args) < 4 {
 		log.Fatalf(fmt.Sprintf("Required at least 3 parameters, app, commit, author, only %v provided", len(args)))
 	}
 
-	config := Config{Config: args[1], Commit: args[2], Deployer: args[3]}
-	return config
+	return cfg.Config{Config: args[1], Commit: args[2], Deployer: args[3]}
 }
 
 func getAppConfigData(location string) string {
@@ -28,8 +31,8 @@ func getAppConfigData(location string) string {
 	return string(dat)
 }
 
-func getAppConfig(c Config) AppConfig {
-	var appConfig AppConfig
+func getAppConfig(c cfg.Config) cfg.AppConfig {
+	var appConfig cfg.AppConfig
 	if _, err := toml.Decode(getAppConfigData(c.Config), &appConfig); err != nil {
 		log.Fatalf("Error decoding config %v", err)
 	}
@@ -40,15 +43,15 @@ func main() {
 	config := getConfig(os.Args)
 	appConfig := getAppConfig(config)
 
-	NotifyOnStart(config, appConfig)
+	notify.OnStart(config, appConfig)
 
-	slugPath := Build(config, appConfig)
-	err := Deploy(slugPath, config, appConfig)
+	slugPath := build.Build(config, appConfig)
+	err := deploy.Deploy(slugPath, config, appConfig)
 
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
-		NotifyOnFailure(config, appConfig)
+		notify.OnFailure(config, appConfig)
 	} else {
-		NotifyOnSuccess(config, appConfig)
+		notify.OnSuccess(config, appConfig)
 	}
 }

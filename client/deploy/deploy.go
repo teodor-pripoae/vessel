@@ -1,9 +1,14 @@
-package client
+package deploy
 
-import "fmt"
+import (
+	"fmt"
+
+	cfg "github.com/teodor-pripoae/vessel/client/config"
+	"github.com/teodor-pripoae/vessel/client/ssh"
+)
 
 // Deploy is called after slug build finished
-func Deploy(slugPath string, config Config, app AppConfig) error {
+func Deploy(slugPath string, config cfg.Config, app cfg.AppConfig) error {
 	for _, server := range *app.Deploy.UploadServers {
 		err := copyDeploySlug(slugPath, server, app)
 
@@ -21,12 +26,12 @@ func Deploy(slugPath string, config Config, app AppConfig) error {
 	return nil
 }
 
-func copyDeploySlug(slugPath string, server string, app AppConfig) error {
+func copyDeploySlug(slugPath string, server string, app cfg.AppConfig) error {
 	if app.Deploy.SlugLocation == nil {
 		return fmt.Errorf("Deploy slug location not defined")
 	}
 
-	sshC, err := getSSHConfig(server)
+	sshC, err := ssh.GetConfig(server)
 
 	if err != nil {
 		return err
@@ -41,8 +46,8 @@ func copyDeploySlug(slugPath string, server string, app AppConfig) error {
 	return nil
 }
 
-func restartService(server string, app AppConfig) error {
-	sshC, err := getSSHConfig(server)
+func restartService(server string, app cfg.AppConfig) error {
+	sshC, err := ssh.GetConfig(server)
 
 	if err != nil {
 		return err

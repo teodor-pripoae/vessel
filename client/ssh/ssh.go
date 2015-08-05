@@ -1,4 +1,4 @@
-package client
+package ssh
 
 // taken from github.com/hypersleep/easyssh
 
@@ -19,8 +19,8 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
-// SSHConfig keeps ssh session stuff
-type SSHConfig struct {
+// Config keeps ssh session stuff together
+type Config struct {
 	User     string
 	Server   string
 	Port     string
@@ -52,7 +52,7 @@ func getKeyFile(keyPath string) (ssh.Signer, error) {
 }
 
 // connects to remote server using MakeConfig struct and returns *ssh.Session
-func (ssh_conf *SSHConfig) connect() (*ssh.Session, error) {
+func (ssh_conf *Config) connect() (*ssh.Session, error) {
 	// auths holds the detected ssh auth methods
 	auths := []ssh.AuthMethod{}
 
@@ -93,7 +93,7 @@ func (ssh_conf *SSHConfig) connect() (*ssh.Session, error) {
 }
 
 // Run executes command on remote machine and returns STDOUT
-func (ssh_conf *SSHConfig) Run(command string) (string, string, error) {
+func (ssh_conf *Config) Run(command string) (string, string, error) {
 	session, err := ssh_conf.connect()
 
 	if err != nil {
@@ -111,7 +111,7 @@ func (ssh_conf *SSHConfig) Run(command string) (string, string, error) {
 }
 
 // Scp uploads sourceFile to remote machine like native scp console app.
-func (ssh_conf *SSHConfig) Scp(sourceFile string, destFile string) error {
+func (ssh_conf *Config) Scp(sourceFile string, destFile string) error {
 	session, err := ssh_conf.connect()
 
 	if err != nil {
@@ -156,8 +156,8 @@ func (ssh_conf *SSHConfig) Scp(sourceFile string, destFile string) error {
 	return nil
 }
 
-// returns ssh connection config
-func getSSHConfig(serverURL string) (*SSHConfig, error) {
+// GetConfig returns ssh connection config
+func GetConfig(serverURL string) (*Config, error) {
 	uri, err := url.Parse(serverURL)
 
 	if err != nil {
@@ -182,7 +182,7 @@ func getSSHConfig(serverURL string) (*SSHConfig, error) {
 		return nil, err
 	}
 
-	config := SSHConfig{
+	config := Config{
 		User:    *user,
 		Server:  *host,
 		Port:    *port,

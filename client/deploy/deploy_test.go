@@ -1,10 +1,12 @@
-package client
+package deploy
 
 import (
 	"os/user"
 	"testing"
 
-	. "github.com/kuende/api_gateway/Godeps/_workspace/src/gopkg.in/check.v1"
+	"github.com/teodor-pripoae/vessel/client/ssh"
+
+	. "gopkg.in/check.v1"
 )
 
 func TestCL(t *testing.T) { TestingT(t) }
@@ -14,13 +16,13 @@ type DeploySuite struct {
 
 var _ = Suite(&DeploySuite{})
 
-// getSSHConfig
-func (s *DeploySuite) TestGetSSHConfigNoPort(c *C) {
+// ssh.GetConfig
+func (s *DeploySuite) TestsshGetConfigNoPort(c *C) {
 	server := "ssh://myuser@my.server.host"
 
-	config, err := getSSHConfig(server)
+	config, err := ssh.GetConfig(server)
 
-	expectedConfig := SSHConfig{
+	expectedConfig := ssh.Config{
 		User:   "myuser",
 		Server: "my.server.host",
 		Key:    "/.ssh/id_rsa",
@@ -31,12 +33,12 @@ func (s *DeploySuite) TestGetSSHConfigNoPort(c *C) {
 	c.Assert(*config, DeepEquals, expectedConfig)
 }
 
-func (s *DeploySuite) TestGetSSHConfigWithPort(c *C) {
+func (s *DeploySuite) TestsshGetConfigWithPort(c *C) {
 	server := "ssh://myuserb@my.server.host:2222"
 
-	config, err := getSSHConfig(server)
+	config, err := ssh.GetConfig(server)
 
-	expectedConfig := SSHConfig{
+	expectedConfig := ssh.Config{
 		User:   "myuserb",
 		Server: "my.server.host",
 		Key:    "/.ssh/id_rsa",
@@ -47,13 +49,13 @@ func (s *DeploySuite) TestGetSSHConfigWithPort(c *C) {
 	c.Assert(*config, DeepEquals, expectedConfig)
 }
 
-func (s *DeploySuite) TestGetSSHConfigNoUserNoPort(c *C) {
+func (s *DeploySuite) TestsshGetConfigNoUserNoPort(c *C) {
 	server := "ssh://my.server.host"
 	currentUser, _ := user.Current()
 
-	config, err := getSSHConfig(server)
+	config, err := ssh.GetConfig(server)
 
-	expectedConfig := SSHConfig{
+	expectedConfig := ssh.Config{
 		User:   currentUser.Username,
 		Server: "my.server.host",
 		Port:   "22",
@@ -64,13 +66,13 @@ func (s *DeploySuite) TestGetSSHConfigNoUserNoPort(c *C) {
 	c.Assert(*config, DeepEquals, expectedConfig)
 }
 
-func (s *DeploySuite) TestGetSSHConfigNoUserWithPort(c *C) {
+func (s *DeploySuite) TestsshGetConfigNoUserWithPort(c *C) {
 	server := "ssh://my.server.host2:2244"
 	currentUser, _ := user.Current()
 
-	config, err := getSSHConfig(server)
+	config, err := ssh.GetConfig(server)
 
-	expectedConfig := SSHConfig{
+	expectedConfig := ssh.Config{
 		User:   currentUser.Username,
 		Server: "my.server.host2",
 		Port:   "2244",
@@ -81,12 +83,12 @@ func (s *DeploySuite) TestGetSSHConfigNoUserWithPort(c *C) {
 	c.Assert(*config, DeepEquals, expectedConfig)
 }
 
-func (s *DeploySuite) TestGetSSHConfigNoPortService(c *C) {
+func (s *DeploySuite) TestsshGetConfigNoPortService(c *C) {
 	server := "ssh://myuser@my.server.host/myapp"
 
-	config, err := getSSHConfig(server)
+	config, err := ssh.GetConfig(server)
 
-	expectedConfig := SSHConfig{
+	expectedConfig := ssh.Config{
 		User:    "myuser",
 		Server:  "my.server.host",
 		Port:    "22",
@@ -98,12 +100,12 @@ func (s *DeploySuite) TestGetSSHConfigNoPortService(c *C) {
 	c.Assert(*config, DeepEquals, expectedConfig)
 }
 
-func (s *DeploySuite) TestGetSSHConfigWithPortService(c *C) {
+func (s *DeploySuite) TestsshGetConfigWithPortService(c *C) {
 	server := "ssh://myuserb@my.server.host:2222/myapp"
 
-	config, err := getSSHConfig(server)
+	config, err := ssh.GetConfig(server)
 
-	expectedConfig := SSHConfig{
+	expectedConfig := ssh.Config{
 		User:    "myuserb",
 		Server:  "my.server.host",
 		Port:    "2222",
@@ -115,13 +117,13 @@ func (s *DeploySuite) TestGetSSHConfigWithPortService(c *C) {
 	c.Assert(*config, DeepEquals, expectedConfig)
 }
 
-func (s *DeploySuite) TestGetSSHConfigNoUserNoPortService(c *C) {
+func (s *DeploySuite) TestsshGetConfigNoUserNoPortService(c *C) {
 	server := "ssh://my.server.host/foo"
 	currentUser, _ := user.Current()
 
-	config, err := getSSHConfig(server)
+	config, err := ssh.GetConfig(server)
 
-	expectedConfig := SSHConfig{
+	expectedConfig := ssh.Config{
 		User:    currentUser.Username,
 		Server:  "my.server.host",
 		Port:    "22",
@@ -133,13 +135,13 @@ func (s *DeploySuite) TestGetSSHConfigNoUserNoPortService(c *C) {
 	c.Assert(*config, DeepEquals, expectedConfig)
 }
 
-func (s *DeploySuite) TestGetSSHConfigNoUserWithPortService(c *C) {
+func (s *DeploySuite) TestsshGetConfigNoUserWithPortService(c *C) {
 	server := "ssh://my.server.host2:2244/bar"
 	currentUser, _ := user.Current()
 
-	config, err := getSSHConfig(server)
+	config, err := ssh.GetConfig(server)
 
-	expectedConfig := SSHConfig{
+	expectedConfig := ssh.Config{
 		User:    currentUser.Username,
 		Server:  "my.server.host2",
 		Port:    "2244",
@@ -151,4 +153,4 @@ func (s *DeploySuite) TestGetSSHConfigNoUserWithPortService(c *C) {
 	c.Assert(*config, DeepEquals, expectedConfig)
 }
 
-// /getSSHConfig
+// /ssh.GetConfig

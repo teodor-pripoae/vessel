@@ -1,4 +1,4 @@
-package client
+package build
 
 import (
 	"fmt"
@@ -8,10 +8,12 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+
+	cfg "github.com/teodor-pripoae/vessel/client/config"
 )
 
 // Build builds an app using config and returns slug_path
-func Build(config Config, app AppConfig) string {
+func Build(config cfg.Config, app cfg.AppConfig) string {
 	checkStdin()
 
 	// this calls slug builder and get container id
@@ -37,7 +39,7 @@ func checkStdin() {
 	}
 }
 
-func buildSlug(config Config, app AppConfig) string {
+func buildSlug(config cfg.Config, app cfg.AppConfig) string {
 	args := slugBuilderCmd(config, app)
 
 	cmd := exec.Command("docker")
@@ -65,7 +67,7 @@ func waitContainer(containerID string) {
 }
 
 // Copy slug.tgz from container to a temporary location
-func copySlug(containerID string, config Config, app AppConfig) string {
+func copySlug(containerID string, config cfg.Config, app cfg.AppConfig) string {
 	tmpDir, err := ioutil.TempDir("", "")
 
 	if err != nil {
@@ -89,7 +91,7 @@ func deleteContainer(containerID string) {
 	cmd.Run()
 }
 
-func slugBuilderCmd(config Config, app AppConfig) []string {
+func slugBuilderCmd(config cfg.Config, app cfg.AppConfig) []string {
 	cmd := []string{"docker", "run"}
 	cmd = slugBuilderAttachNetwork(cmd)
 	cmd = slugBuilderAttachStdin(cmd)
@@ -112,7 +114,7 @@ func slugBuilderAttachStdin(cmd []string) []string {
 	return append(cmd, "stdin")
 }
 
-func slugBuilderAttachEnv(cmd []string, config Config, app AppConfig) []string {
+func slugBuilderAttachEnv(cmd []string, config cfg.Config, app cfg.AppConfig) []string {
 	// -e BUILDPACK_URL= -e BUILDPACK_VENDOR_URL -e COMMIT_HASH= --env-file=...
 	if app.Build.Env != nil {
 		for _, e := range *app.Build.Env {
@@ -141,7 +143,7 @@ func slugBuilderAttachEnv(cmd []string, config Config, app AppConfig) []string {
 	return cmd
 }
 
-func slugBuilderAttachVolumes(cmd []string, config Config, app AppConfig) []string {
+func slugBuilderAttachVolumes(cmd []string, config cfg.Config, app cfg.AppConfig) []string {
 	// -v /etc/buildpacks:/buildpacks -v /var/docker/build/test:/tmp/cache
 	if app.Build.Volumes != nil {
 		for _, v := range *app.Build.Volumes {
@@ -152,7 +154,7 @@ func slugBuilderAttachVolumes(cmd []string, config Config, app AppConfig) []stri
 	return cmd
 }
 
-func slugBuilderAttachImage(cmd []string, config Config, app AppConfig) []string {
+func slugBuilderAttachImage(cmd []string, config cfg.Config, app cfg.AppConfig) []string {
 	if app.Build.BuildImage != nil {
 		return append(cmd, *app.Build.BuildImage)
 	}

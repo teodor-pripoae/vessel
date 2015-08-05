@@ -1,4 +1,4 @@
-package client
+package notify
 
 import (
 	"bytes"
@@ -7,10 +7,12 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+
+	cfg "github.com/teodor-pripoae/vessel/client/config"
 )
 
-// NotifyOnStart is called when a deploy starts
-func NotifyOnStart(config Config, app AppConfig) {
+// OnStart is called when a deploy starts
+func OnStart(config cfg.Config, app cfg.AppConfig) {
 	nc := app.Notify
 
 	if nc == nil {
@@ -26,8 +28,8 @@ func NotifyOnStart(config Config, app AppConfig) {
 	}
 }
 
-// NotifyOnFailure is called when a deploy fails
-func NotifyOnFailure(config Config, app AppConfig) {
+// OnFailure is called when a deploy fails
+func OnFailure(config cfg.Config, app cfg.AppConfig) {
 	nc := app.Notify
 
 	if nc == nil {
@@ -43,8 +45,8 @@ func NotifyOnFailure(config Config, app AppConfig) {
 	}
 }
 
-// NotifyOnSuccess is called when a deploy is finished
-func NotifyOnSuccess(config Config, app AppConfig) {
+// OnSuccess is called when a deploy is finished
+func OnSuccess(config cfg.Config, app cfg.AppConfig) {
 	nc := app.Notify
 
 	if nc == nil {
@@ -60,7 +62,7 @@ func NotifyOnSuccess(config Config, app AppConfig) {
 	}
 }
 
-func notifySlack(config Config, app AppConfig, event string) {
+func notifySlack(config cfg.Config, app cfg.AppConfig, event string) {
 	slack := app.Notify.Slack
 
 	message := fmt.Sprintf("Deploy for app %s on %s %sed", app.App, app.Stage, event)
@@ -85,7 +87,7 @@ func notifySlack(config Config, app AppConfig, event string) {
 	}
 }
 
-func notifyOpbeat(config Config, app AppConfig, event string) {
+func notifyOpbeat(config cfg.Config, app cfg.AppConfig, event string) {
 	opConfig := app.Notify.Opbeat
 	webhookURL := fmt.Sprintf("https://opbeat.com/api/v1/organizations/%s/apps/%s/releases/", opConfig.OrgID, opConfig.AppID)
 
