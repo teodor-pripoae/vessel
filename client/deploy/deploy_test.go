@@ -6,7 +6,7 @@ import (
 
 	"github.com/teodor-pripoae/vessel/client/ssh"
 
-	. "gopkg.in/check.v1"
+	. "github.com/teodor-pripoae/vessel/Godeps/_workspace/src/gopkg.in/check.v1"
 )
 
 func TestCL(t *testing.T) { TestingT(t) }

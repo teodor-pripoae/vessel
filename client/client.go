@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/BurntSushi/toml"
+	"github.com/teodor-pripoae/vessel/Godeps/_workspace/src/github.com/BurntSushi/toml"
 	"github.com/teodor-pripoae/vessel/client/build"
 	cfg "github.com/teodor-pripoae/vessel/client/config"
 	"github.com/teodor-pripoae/vessel/client/deploy"

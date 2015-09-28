@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
+	"github.com/teodor-pripoae/vessel/Godeps/_workspace/src/golang.org/x/crypto/ssh"
+	"github.com/teodor-pripoae/vessel/Godeps/_workspace/src/golang.org/x/crypto/ssh/agent"
 )
 
 // Config keeps ssh session stuff together
