@@ -9,4 +9,4 @@ release:
 	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w' -o release/vessel ./client
 
 test:
-	go test -v ./client
+	go test -v ./client/...
