@@ -48,16 +48,16 @@ volumes = [
 [deploy]
 slug_location = "/etc/vessel/myapp/slug_current.tgz"
 upload = [
-  "myuser@web1.myapp.com",
-  "myuser@web2.myapp.com",
-  "myuser@worker1.myapp.com",
-  "myuser@worker2.myapp.com"
+  "ssh://myuser@web1.myapp.com",
+  "ssh://myuser@web2.myapp.com",
+  "ssh://myuser@worker1.myapp.com",
+  "ssh://myuser@worker2.myapp.com"
 ]
 services = [
-  "myuser@web1.myapp.com/rails",
-  "myuser@web2.myapp.com/rails",
-  "myuser@worker1.myapp.com/sidekiq",
-  "myuser@worker2.myapp.com/sidekiq"
+  "ssh://myuser@web1.myapp.com/rails",
+  "ssh://myuser@web2.myapp.com/rails",
+  "ssh://myuser@worker1.myapp.com/sidekiq",
+  "ssh://myuser@worker2.myapp.com/sidekiq"
 ]
 
 [notify]
