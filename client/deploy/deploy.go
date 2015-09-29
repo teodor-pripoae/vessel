@@ -4,15 +4,14 @@ import (
 	"fmt"
 
 	cfg "github.com/teodor-pripoae/vessel/client/config"
+	"github.com/teodor-pripoae/vessel/client/deploy/uploaders"
 	"github.com/teodor-pripoae/vessel/client/ssh"
 )
 
 // Deploy is called after slug build finished
 func Deploy(slugPath string, config cfg.Config, app cfg.AppConfig) error {
 	for _, server := range *app.Deploy.UploadServers {
-		err := copyDeploySlug(slugPath, server, app)
-
-		if err != nil {
+		if err := copyDeploySlug(slugPath, server, app); err != nil {
 			return err
 		}
 	}
@@ -27,19 +26,15 @@ func Deploy(slugPath string, config cfg.Config, app cfg.AppConfig) error {
 }
 
 func copyDeploySlug(slugPath string, server string, app cfg.AppConfig) error {
-	if app.Deploy.SlugLocation == nil {
-		return fmt.Errorf("Deploy slug location not defined")
-	}
-
-	sshC, err := ssh.GetConfig(server)
+	uploader, err := uploaders.NewUploader(server, app.Deploy.SlugLocation)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Uploading slug to server %v\n", sshC.Server)
+	fmt.Printf("Uploading slug to server %v\n", uploader.Server())
 
-	if err := sshC.Scp(slugPath, *app.Deploy.SlugLocation); err != nil {
+	if err := uploader.Put(slugPath); err != nil {
 		return err
 	}
 
