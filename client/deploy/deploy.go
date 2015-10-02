@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	cfg "github.com/teodor-pripoae/vessel/client/config"
+	"github.com/teodor-pripoae/vessel/client/deploy/services"
 	"github.com/teodor-pripoae/vessel/client/deploy/uploaders"
-	"github.com/teodor-pripoae/vessel/client/ssh"
 )
 
 // Deploy is called after slug build finished
 func Deploy(slugPath string, config cfg.Config, app cfg.AppConfig) error {
 	for _, server := range *app.Deploy.UploadServers {
-		if err := copyDeploySlug(slugPath, server, app); err != nil {
+		if err := uploadSlug(slugPath, server, app); err != nil {
 			return err
 		}
 	}
@@ -25,7 +25,8 @@ func Deploy(slugPath string, config cfg.Config, app cfg.AppConfig) error {
 	return nil
 }
 
-func copyDeploySlug(slugPath string, server string, app cfg.AppConfig) error {
+// Upload slug to servers using ssh or upload to webdav
+func uploadSlug(slugPath string, server string, app cfg.AppConfig) error {
 	uploader, err := uploaders.NewUploader(server, app.Deploy.SlugLocation)
 
 	if err != nil {
@@ -41,22 +42,15 @@ func copyDeploySlug(slugPath string, server string, app cfg.AppConfig) error {
 	return nil
 }
 
+// Restart services remote using ssh or marathon API
 func restartService(server string, app cfg.AppConfig) error {
-	sshC, err := ssh.GetConfig(server)
+	service, err := services.NewService(server)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Restarting service %v on server %v\n", sshC.Service, sshC.Server)
-
-	restartCmd := fmt.Sprintf("sudo service %s restart", sshC.Service)
-
-	stdout, stderr, err := sshC.Run(restartCmd)
-
-	if err != nil {
-		fmt.Printf("Stdout: %s\n", stdout)
-		fmt.Printf("Stderr: %s\n", stderr)
+	if err = service.Restart(); err != nil {
 		return err
 	}
 
