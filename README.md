@@ -5,6 +5,7 @@ Simple Heroku clone on your own servers. Based on [gitreceive](https://github.co
 
 This script takes a payload from gitreceive, runs the buildpack based on your configuration, uploads the slug to your servers and then restarts your services.
 
+
 ### Compiling
 
 ```bash
@@ -51,13 +52,16 @@ upload = [
   "ssh://myuser@web1.myapp.com",
   "ssh://myuser@web2.myapp.com",
   "ssh://myuser@worker1.myapp.com",
-  "ssh://myuser@worker2.myapp.com"
+  "ssh://myuser@worker2.myapp.com",
+  "webdav://myserver:8000/myapp/slugs/current.tgz"
 ]
 services = [
   "ssh://myuser@web1.myapp.com/rails",
   "ssh://myuser@web2.myapp.com/rails",
   "ssh://myuser@worker1.myapp.com/sidekiq",
-  "ssh://myuser@worker2.myapp.com/sidekiq"
+  "ssh://myuser@worker2.myapp.com/sidekiq",
+  "mrt://myserver:8080/rails",
+  "mrt://myserver:8080/sidekiq"
 ]
 
 [notify]
@@ -97,9 +101,10 @@ worker: bin/sidekiq
 
 ### Todo
 
+- [X] support plugin system for uploaders (SSH, WebDav)
+- [X] support plugin system for services (SSH, Marathon)
+- [ ] support plugin for S3
+- [ ] support plugin for Kubernetes / Systemd, etc
 - [ ] fix notifying on failure (currently it does not work properly)
 - [ ] fix cleaning up the mess (tmp slug) on failure
-- [ ] support for uploading slug to S3 instead of uploading to servers
-- [ ] support for setting environment variables on all servers and doing a full restart of services
-- [ ] examples of upstart scripts with path or s3 config
 - [ ] more notifiers

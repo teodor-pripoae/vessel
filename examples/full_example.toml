@@ -27,8 +27,8 @@ services = [
   "ssh://myuser@web2.myapp.com/rails",
   "ssh://myuser@worker1.myapp.com/sidekiq",
   "ssh://myuser@worker2.myapp.com/sidekiq",
-  "mesos://myserver:8080/rails",
-  "mesos://myserver:8080/sidekiq",
+  "mrt://myserver:8080/rails",
+  "mrt://myserver:8080/sidekiq",
 ]
 
 [notify]
