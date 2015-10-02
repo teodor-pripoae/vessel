@@ -1,5 +1,5 @@
 app:
-  image: golang:latest
+  image: golang:1.4
   working_dir: /go/src/github.com/teodor-pripoae/vessel
   volumes:
     - .:/go/src/github.com/teodor-pripoae/vessel
