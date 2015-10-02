@@ -1,4 +1,4 @@
-.PHONY: default release
+.PHONY: default release deps release
 
 default:
 	mkdir -p bin
