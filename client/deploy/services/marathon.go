@@ -38,6 +38,7 @@ func (c *MarathonService) Restart() error {
 	hc := http.Client{}
 	url := fmt.Sprintf("%s/v2/apps/%s/restart?force=true", c.url, c.app)
 	req, err := http.NewRequest("POST", url, strings.NewReader(""))
+	req.Header.Set("Content-Type", "application/json")
 
 	if err != nil {
 		return err
